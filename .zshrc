@@ -33,7 +33,7 @@ grep="grep --color=auto" \
 
 # load modules
 zmodload zsh/complist
-autoload -U compinit && compinit -d $XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION
+autoload -U compinit && compinit -d $XDG_CACHE_HOME/zcompdump-$ZSH_VERSION
 autoload -U colors && colors
 
 # setup fzf
