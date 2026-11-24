@@ -66,9 +66,18 @@ bindkey "^J" history-search-forward
 bindkey "^K" history-search-backward
 
 # set up prompt
+setopt PROMPT_SUBST
+git_rprompt() {
+  [[ -e .git ]] || return  # only when .git exists in *current* dir
+  local branch dirty
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) || return
+  git diff --quiet --ignore-submodules HEAD 2>/dev/null
+  dirty=$([[ $? -eq 0 ]] && echo "" || echo "*")
+  echo " ${branch}${dirty}"
+}
 NEWLINE=$'\n'
 PROMPT=$NEWLINE'%B%F{blue}(%2~)%f %F{49}'$NEWLINE'❯%f%b '
-RPROMPT='%F{8}[%@]%f'
+RPROMPT=$'%{\e[1A%}%F{8}$(git_rprompt) [%*]%f%{\e[1B%}'
 
 # autosuggestions
 # requires zsh-autosuggestions
