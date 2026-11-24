@@ -1,7 +1,16 @@
 # default programs
 export EDITOR="nvim"
-export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
-export PATH="$PATH:/opt/fzf/bin"
+if ! command -v nvim >/dev/null 2>&1; then
+    echo "nvim not found. Install nvim."
+else 
+    path+=($(command -v nvim))
+fi
+if ! command -v fzf >/dev/null 2>&1; then
+    echo "fzf not found. Install fzf."
+else
+    path+=($(command -v fzf))
+fi
+export PATH
 # export DISPLAY=:0 # useful for some scripts
 
 # follow XDG base dir specification
@@ -86,4 +95,3 @@ RPROMPT=$'%{\e[1A%}%F{8}$(git_rprompt) [%*]%f%{\e[1B%}'
 # syntax highlighting
 # requires zsh-syntax-highlighting package
 # source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
