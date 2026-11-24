@@ -85,7 +85,7 @@ git_rprompt() {
   echo " ${branch}${dirty}"
 }
 NEWLINE=$'\n'
-PROMPT=$NEWLINE'%B%F{blue}(%2~)%f %F{49}'$NEWLINE'❯%f%b '
+PROMPT=$NEWLINE'%B%F{blue}(%2~)%f %F{49}'$NEWLINE'  ❯%f%b '
 RPROMPT=$'%{\e[1A%}%F{8}$(git_rprompt) [%*]%f%{\e[1B%}'
 
 # autosuggestions
