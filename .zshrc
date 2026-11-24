@@ -2,7 +2,7 @@
 export EDITOR="nvim"
 if ! command -v nvim >/dev/null 2>&1; then
     echo "nvim not found. Install nvim."
-else 
+else
     path+=($(command -v nvim))
 fi
 if ! command -v fzf >/dev/null 2>&1; then
