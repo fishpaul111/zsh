@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Define the target file path
+ZSHENV_PATH="$HOME/.zshenv"
+
+if [ ! -f "$ZSHENV_PATH" ]; then
+    # Create the file with the required export
+    echo 'export ZDOTDIR="$HOME/.config/zsh"' > "$ZSHENV_PATH"
+    echo "Created $ZSHENV_PATH with ZDOTDIR configuration."
+fi   
+
+if ! command -v zsh >/dev/null 2>&1; then
+    echo "Error: zsh is not installed or not found in PATH." >&2
+    return
+else
+    echo "zsh found - starting zsh."
+    $(command -v zsh) -l -i
+fi   
