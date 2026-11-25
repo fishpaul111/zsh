@@ -1,18 +1,45 @@
 #!/bin/sh
 
-# Define the target file path
-ZSHENV_PATH="$HOME/.zshenv"
-
-if [ ! -f "$ZSHENV_PATH" ]; then
-    # Create the file with the required export
-    echo 'export ZDOTDIR="$HOME/.config/zsh"' > "$ZSHENV_PATH"
-    echo "Created $ZSHENV_PATH with ZDOTDIR configuration."
-fi
-
 if ! command -v zsh >/dev/null 2>&1; then
     echo "Error: zsh is not installed or not found in PATH." >&2
-    return
-else
-    echo "zsh found - starting zsh."
-    $(command -v zsh) -l -i
+    exit 1
 fi
+
+ZSHENV_PATH="$HOME/.zshenv"
+ZDOTDIR_BOOTSTRAP='export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"'
+ZSHENV_SOURCE='source "$ZDOTDIR/.zshenv"'
+ZSHENV_DOT_SOURCE='. "$ZDOTDIR/.zshenv"'
+
+zshenv_has_config_bootstrap() {
+    grep -Fq "$ZDOTDIR_BOOTSTRAP" "$ZSHENV_PATH" &&
+        {
+            grep -Fq "$ZSHENV_SOURCE" "$ZSHENV_PATH" ||
+                grep -Fq "$ZSHENV_DOT_SOURCE" "$ZSHENV_PATH"
+        }
+}
+
+if [ ! -f "$ZSHENV_PATH" ] || ! zshenv_has_config_bootstrap; then
+    if [ ! -f "$ZSHENV_PATH" ]; then
+        : > "$ZSHENV_PATH" || {
+            echo "Error: could not create $ZSHENV_PATH." >&2
+            exit 1
+        }
+    fi
+
+    if ! cat >> "$ZSHENV_PATH" <<'EOF'
+
+# >>> zsh config bootstrap >>>
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+if [ -r "$ZDOTDIR/.zshenv" ]; then
+    . "$ZDOTDIR/.zshenv"
+fi
+# <<< zsh config bootstrap <<<
+EOF
+    then
+        echo "Error: could not add the zsh config bootstrap to $ZSHENV_PATH." >&2
+        exit 1
+    fi
+fi
+
+echo "zsh found - starting zsh."
+exec "$(command -v zsh)" -l -i

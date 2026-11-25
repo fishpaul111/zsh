@@ -1,25 +1,13 @@
 # default programs
 export EDITOR="nvim"
 if ! command -v nvim >/dev/null 2>&1; then
-    echo "nvim not found. Install nvim."
-else
-    path+=($(command -v nvim))
+    echo "nvim not found on PATH."
 fi
 if ! command -v fzf >/dev/null 2>&1; then
-    echo "fzf not found. Install fzf."
-else
-    path+=($(command -v fzf))
+    echo "fzf not found on PATH."
 fi
 export PATH
 # export DISPLAY=:0 # useful for some scripts
-
-# follow XDG base dir specification
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_CACHE_HOME="$HOME/.cache"
-
-# bootstrap .zshrc to ~/.config/zsh/.zshrc, any other zsh config files can also reside here
-export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
 # Aliases
 alias \
@@ -30,14 +18,12 @@ l="ls -lh --color=auto --group-directories-first" \
 ls="ls -h --color=auto --group-directories-first" \
 la="ls -lah --color=auto --group-directories-first" \
 grep="grep --color=auto" \
+cat="batcat" \
 
 # load modules
 zmodload zsh/complist
-autoload -U compinit && compinit -d $XDG_CACHE_HOME/zcompdump-$ZSH_VERSION
+autoload -Uz compinit && compinit -d "$XDG_CACHE_HOME/zcompdump-$ZSH_VERSION"
 autoload -U colors && colors
-
-# setup fzf
-source <(fzf --zsh)
 
 # cmp opts
 zstyle ':completion:*' menu select # tab opens cmp menu
@@ -66,10 +52,24 @@ HISTFILE="$XDG_CACHE_HOME/zsh_history" # move histfile to cache
 HISTCONTROL=ignoreboth # consecutive duplicates & commands starting with space are not saved
 
 # fzf setup
-source <(fzf --zsh) # allow for fzf history widget
+if (( $+commands[fzf] )); then
+    source <(fzf --zsh) # allow for fzf history widget
+    bindkey '^R' fzf-history-widget
+fi
+
+# Use Debian/Ubuntu's batcat executable in fzf previews.
+export FZF_CTRL_T_OPTS='--preview "batcat --style=numbers --color=always --line-range :500 {}"'
+_fzf_comprun() {
+  local command=$1
+  shift
+  case "$command" in
+    cd) fzf --preview 'ls -la --color=always {}' "$@" ;;
+    export|unset|ssh) fzf "$@" ;;
+    *) fzf --preview 'batcat --style=numbers --color=always --line-range :500 {}' "$@" ;;
+  esac
+}
 
 # binds
-bindkey '^R' fzf-history-widget
 # ctrl J & K for going up and down in prev commands
 bindkey "^J" history-search-forward
 bindkey "^K" history-search-backward
@@ -85,7 +85,7 @@ git_rprompt() {
   echo " ${branch}${dirty}"
 }
 NEWLINE=$'\n'
-PROMPT=$NEWLINE'%B%F{blue}(%2~)%f %F{49}'$NEWLINE'  ❯%f%b '
+PROMPT=$NEWLINE'%B%F{red}(%2~)%f %F{red}'$NEWLINE'>%f%b '
 RPROMPT=$'%{\e[1A%}%F{8}$(git_rprompt) [%*]%f%{\e[1B%}'
 
 # autosuggestions
